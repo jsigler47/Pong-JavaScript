@@ -18,16 +18,25 @@ function setup(){
 
   ball1 = new ball(width / 2, height / 2);
 
-  ball1.xv = random(-1, 1); //Ball will go in any direction at start.
-  ball1.yv = random(-1, 1);
+  ball1.xv = Math.random() < 0.5 ? -1 : 1; //Ball will go in any direction at start.
+  ball1.yv = Math.random() < 0.5 ? -1 : 1;
 }
 
 
 function draw() {
 
   background(0) //Refresh the screen.
+
 //Move Player2
 if(start){
+
+  fill(255); //Reset fill for players and divider
+  //Draw the scores
+  stroke(255);
+  textFont('monospace')
+  text(player1.score, (width / 2) - pWidth * 2, pHeight / 2);
+  text(player2.score, (width / 2) + pWidth * 2, pHeight / 2);
+  stroke(0)
 
   if(player2.y > 0 && player2.y < height){ //Player 2 is within boundaries
   	var save = player2.y
@@ -68,7 +77,7 @@ if(start){
 	  	}
 	 }
 	//Check for collision
-	if(ball1.x <= player1.x && ball1.y >= player1.y && ball1.y <= player1.y + pHeight){ //Collided with player 1
+	if(ball1.x <= player1.x + pWidth && ball1.y >= player1.y && ball1.y <= player1.y + pHeight){ //Collided with player 1
 		ball1.xv = -ball1.xv; //Reverse the direction
 		ball.yv = random(-1, 1);
 		ball1.x += ball1.xv * ballSpeed;
@@ -96,13 +105,6 @@ if(start){
   //Draw the ball
   fill(0, 255, 0); //Color of the ball
   ellipse(ball1.x, ball1.y, ballSize);
-  fill(255); //Reset fill for players and divider
-  //Draw the scores
-  stroke(255);
-  textFont('monospace')
-  text(player1.score, (width / 2) - pWidth * 2, pHeight / 2);
-  text(player2.score, (width / 2) + pWidth * 2, pHeight / 2);
-  stroke(0)
 
 }//End of if(start)
 else{
@@ -154,11 +156,20 @@ function keyReleased(){
 }
 
 function resetBall(){ //Reset ball after point is scored.
-		//Reset ball
-  		ball1.x = width / 2;
-  		ball1.y = height / 2;
-  		ballSpeed = saveSpeed;
-  		ball1.xv = random(-1, 1);
-  		ball1.yv = random(-1, 1);
-}
+		//Stop the balls movement and center it
+		ball1.x = width / 2;
+	  	ball1.y = height / 2;
+		ball1.xv = 0;
+		ball1.yv = 0;
 
+		setTimeout(cont, 1500); // Pause.
+
+		function cont(){
+	  		ballSpeed = saveSpeed;
+	  		ball1.xv = Math.random() < 0.5 ? -1 : 1;
+	  		ball1.yv = Math.random() < 0.5 ? -1 : 1;
+		}
+
+
+
+}
