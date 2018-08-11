@@ -2,10 +2,11 @@
 var pWidth = 10;
 var pHeight = 70;
 var ballSize = 20;
-var playerSpeed = 5
+var playerSpeed = 5;
 var ballSpeed = 6; //Initial value
 var saveSpeed = ballSpeed;
 var start = false;
+var win = false;
 
 function setup(){
 
@@ -25,18 +26,16 @@ function setup(){
 
 function draw() {
 
-  background(0) //Refresh the screen.
-
 //Move Player2
 if(start){
-
+  background(0) //Refresh the screen.
   fill(255); //Reset fill for players and divider
   //Draw the scores
   stroke(255);
-  textFont('monospace')
+  textFont('monospace');
   text(player1.score, (width / 2) - pWidth * 2, pHeight / 2);
   text(player2.score, (width / 2) + pWidth * 2, pHeight / 2);
-  stroke(0)
+  stroke(0);
 
   if(player2.y > 0 && player2.y < height){ //Player 2 is within boundaries
   	var save = player2.y
@@ -106,8 +105,13 @@ if(start){
   fill(0, 255, 0); //Color of the ball
   ellipse(ball1.x, ball1.y, ballSize);
 
+  if(player1.score == 10 || player2.score == 10){
+  	pWin();
+  }
+
 }//End of if(start)
-else{
+else if(!win){
+	background(0) //Refresh the screen.
 	stroke(0, 204, 0);
 	fill(0, 204, 0);
 	strokeWeight(2);
@@ -117,7 +121,8 @@ else{
 	text('PRESS ENTER TO CONTINUE', width / 2, height / 2);
 	noStroke();
 }
-}
+
+} // End of draw
 
 function keyPressed(){
 	if(keyCode == ENTER)
@@ -169,7 +174,18 @@ function resetBall(){ //Reset ball after point is scored.
 	  		ball1.xv = Math.random() < 0.5 ? -1 : 1;
 	  		ball1.yv = Math.random() < 0.5 ? -1 : 1;
 		}
+}
 
+function pWin(){
+	
+	win = true;
+	start = false;
+	stroke(0)
 
-
+	background(0);
+	if(player1.score == 10)
+		text('Player 1 wins!', width / 2, height / 2);
+	else{
+		text('Player 2 wins!', width / 2, height / 2);
+	}
 }
