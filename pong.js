@@ -1,115 +1,56 @@
-
-var pWidth = 10;
-var pHeight = 70;
-var ballSize = 20;
-var playerSpeed = 5;
-var ballSpeed = 6; //Initial value
-var saveSpeed = ballSpeed;
-var start = false;
-var win = false;
+let playerSpeed = 5;
+let saveSpeed = 6;
+let delay = 1500;
+let playing = false;
+let win = false;
 
 function setup(){
 
-	var width = 800;
-	var height = 500;
-  createCanvas(width ,height);
+	let width = 800;
+	let height = 500;
+	createCanvas(width ,height);
 
-  player1 = new player(0 + 2 * pWidth, (height - pHeight) / 2);
-  player2 = new player(width - 2 * pWidth, (height - pHeight) / 2);
-
-  ball1 = new ball(width / 2, height / 2);
-
-  ball1.xv = Math.random() < 0.5 ? -1 : 1; //Ball will go in any direction at start.
-  ball1.yv = Math.random() < 0.5 ? -1 : 1;
+	player1 = new Player(0 + 2 * 10, (height - 70) / 2);
+	player2 = new Player(width - 2 * 10, (height - 70) / 2);
+	ball = new Ball(width / 2, height / 2);
+	ball.reset();
+	setTimeout(function(){cont();}, delay);
 }
 
 
+
 function draw() {
+if(playing){
+	draw_background();
+	//Draw players and ball
+	ball.move();
+	ball.show();
+	//let num = ball.speed;
+	//ball.show(num.map(5.5, 9, 0, 255)); //Ball gets more red as it's speed increases.
+	player1.move();
+	player2.move();
+	player1.show();
+	player2.show();
 
-//Move Player2
-if(start){
-  background(0) //Refresh the screen.
-  fill(255); //Reset fill for players and divider
-  //Draw the scores
-  stroke(255);
-  textFont('monospace');
-  text(player1.score, (width / 2) - pWidth * 2, pHeight / 2);
-  text(player2.score, (width / 2) + pWidth * 2, pHeight / 2);
-  stroke(0);
+	if(ball.x <= player1.x && (ball.y < player1.y || ball.y > player1.y + 70)){ //Check for ball out of bounds on Player 1 (left) side
+		player2.score += 1
+		ball.reset();
+		setTimeout(function(){cont();}, delay);
+	}
+	if(ball.x >= player2.x && (ball.y < player2.y || ball.y > player2.y + 70)){ //Check for ball out of bounds on Player 2 (right) side
+		player1.score += 1
+		ball.reset();
+		setTimeout(function(){cont();}, delay);
+	}
 
-  if(player2.y > 0 && player2.y < height){ //Player 2 is within boundaries
-  	var save = player2.y
-  	player2.y += player2.v;
-  	if(player2.y <= 0 || player2.y >= height - pHeight){
-  		player2.y = save;
-  	}
-  }
-//Move Player1
-  if(player1.y > 0 && player1.y < height){ //Player 1 is within boundaries
-  	var save = player1.y
-  	player1.y += player1.v;
-  	if(player1.y <= 0 || player1.y >= height - pHeight){
-  		player1.y = save;
-  	}
-  }
-//Draw the players
-	stroke(0);
-	rect(player1.x, player1.y, pWidth, pHeight); 
-	rect(player2.x - 1, player2.y, pWidth, pHeight); 
-
-//Draw the divider
-	stroke(255)
- 	rect((width / 2) - (pWidth / 4), 0, pWidth / 2, height);
-
-//Move the ball
-	// x-axis movement and scoring
-	if(ball1.x >= 0 && ball1.x <= width){ //Ball is in bounds
-	  	ball1.x += ball1.xv * ballSpeed; //Move the ball
-
-	  	if(ball1.x <= player1.x && (ball1.y < player1.y || ball1.y > player1.y + pHeight)){ //Check for ball out of bounds on Player 1 (left) side
-	  		player2.score += 1
-	  		resetBall();
-	  	}
-	  	if(ball1.x >= player2.x && (ball1.y < player2.y || ball1.y > player2.y + pHeight)){ //Check for ball out of bounds on Player 2 (right) side
-	  		player1.score += 1
-	  		resetBall();
-	  	}
-	 }
 	//Check for collision
-	if(ball1.x <= player1.x + pWidth && ball1.y >= player1.y && ball1.y <= player1.y + pHeight){ //Collided with player 1
-		ball1.xv = -ball1.xv; //Reverse the direction
-		ball.yv = random(-1, 1);
-		ball1.x += ball1.xv * ballSpeed;
-		ballSpeed += .3; //Increase ball speed.
-	}
-	if(ball1.x >= player2.x && ball1.y >= player2.y && ball1.y <= player2.y + pHeight){ //Collided with player 2
-		ball1.xv = -ball1.xv; //Reverse the direction
-		ball.yv = random(-1, 1);
-		ball1.x += ball1.xv * ballSpeed;
-		ballSpeed += .3;
-	}
-	// Y-axis movement
-	if(ball1.y >= 0 && ball1.y <= height){ //Ball is in bounds
-		ball1.y += ball1.yv * ballSpeed;
-	}
-	// Check for collision
-	else if(ball1.y > height){ //Ball hit floor
-		ball1.yv = -ball1.yv;
-		ball1.y = height;
-	}
-	else if(ball1.y < 0){ //Ball hit ceiling
-		ball1.yv = -ball1.yv;
-		ball1.y = 0;
-	}
-  //Draw the ball
-  fill(0, 255, 0); //Color of the ball
-  ellipse(ball1.x, ball1.y, ballSize);
+	collision(player1, player2, ball);
 
-  if(player1.score == 10 || player2.score == 10){
-  	pWin();
-  }
+	if(player1.score == 10 || player2.score == 10){
+		pWin();
+	}
 
-}//End of if(start)
+}//End of if(playing)
 else if(!win){
 	background(0) //Refresh the screen.
 	stroke(0, 204, 0);
@@ -122,12 +63,12 @@ else if(!win){
 	noStroke();
 }
 
-} // End of draw
+}// End of draw
 
 function keyPressed(){
-	if(keyCode == ENTER)
-		start = !start
-	if(start){
+	if(keyCode == ENTER) //Start or stop the game.
+		playing = !playing
+	if(playing){
 		if(keyCode == UP_ARROW){
 			player2.v = -1 * playerSpeed;
 		}
@@ -139,7 +80,7 @@ function keyPressed(){
 
 function keyTyped(){
 	
-	if(start){
+	if(playing){
 		if(key == 'w' || key == 'W'){
 			player1.v = -1 * playerSpeed;
 		}
@@ -150,7 +91,7 @@ function keyTyped(){
 }
 
 function keyReleased(){
-	if(start){
+	if(playing){
 		if(key == 'w' || key == 'W' || key == 's' || key == 'S'){
 			player1.v = 0;
 		}
@@ -160,26 +101,10 @@ function keyReleased(){
 	}
 }
 
-function resetBall(){ //Reset ball after point is scored.
-		//Stop the balls movement and center it
-		ball1.x = width / 2;
-	  	ball1.y = height / 2;
-		ball1.xv = 0;
-		ball1.yv = 0;
-
-		setTimeout(cont, 1500); // Pause.
-
-		function cont(){
-	  		ballSpeed = saveSpeed;
-	  		ball1.xv = Math.random() < 0.5 ? -1 : 1;
-	  		ball1.yv = Math.random() < 0.5 ? -1 : 1;
-		}
-}
-
 function pWin(){
 	
 	win = true;
-	start = false;
+	playing = false;
 	stroke(0)
 
 	background(0);
@@ -189,3 +114,34 @@ function pWin(){
 		text('Player 2 wins!', width / 2, height / 2);
 	}
 }
+
+function collision(playerA, playerB, ball){
+	if(ball.x <= playerA.x + playerA.w && ball.y >= playerA.y && ball.y <= playerA.y + playerA.h){ //Collided with player 1
+		ball.reverse();
+	}
+	if(ball.x >= playerB.x && ball.y >= playerB.y && ball.y <= playerB.y + playerB.h){ //Collided with player 2
+		ball.reverse();
+	}
+}
+function cont(){
+	ball.speed = saveSpeed;
+	ball.xv = Math.random() < 0.5 ? -1 : 1;
+	ball.yv = Math.random() < 0.5 ? -1 : 1;
+}
+function draw_background(){
+	background(0) //Refresh the screen.
+	fill(255);
+
+	//Draw the scores
+	stroke(255);
+	textFont('monospace');
+	text(player1.score, (width / 2) - 10 * 2, 70 / 2);
+	text(player2.score, (width / 2) + 10 * 2, 70 / 2);
+	//Draw the divider
+	stroke(255)
+	rect((width / 2) - (10 / 4), 0, 10 / 2, height);
+}
+/*Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+	//https://gist.github.com/xposedbones/75ebaef3c10060a3ee3b246166caab56
+	return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}*/ //Might use this later to change the color of the ball based on its speed.
